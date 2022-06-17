@@ -271,7 +271,6 @@ func (g *Graph) addEdges(schema *load.Schema) {
 	t, _ := g.typ(schema.Name)
 	seen := make(map[string]struct{}, len(schema.Edges))
 	for _, e := range schema.Edges {
-		fmt.Println(e.Name, e.Comment)
 		typ, ok := g.typ(e.Type)
 		expect(ok, "type %q does not exist for edge", e.Type)
 		_, ok = t.fields[e.Name]
