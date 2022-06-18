@@ -30,6 +30,7 @@ const (
 // Table schema definition for SQL dialects.
 type Table struct {
 	Name        string
+	Remark      string
 	Columns     []*Column
 	columns     map[string]*Column
 	Indexes     []*Index
@@ -44,6 +45,12 @@ func NewTable(name string) *Table {
 		Name:    name,
 		columns: make(map[string]*Column),
 	}
+}
+
+// SetRemark set a remark
+func (t *Table) SetRemark(r string) *Table {
+	t.Remark = r
+	return t
 }
 
 // AddPrimary adds a new primary key to the table.
@@ -177,6 +184,7 @@ func (t *Table) fk(symbol string) (*ForeignKey, bool) {
 type Column struct {
 	Name       string            // column name.
 	Type       field.Type        // column type.
+	Remark     string            // column description
 	SchemaType map[string]string // optional schema type per dialect.
 	Attr       string            // extra attributes.
 	Size       int64             // max size parameter for string, blob, etc.

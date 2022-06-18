@@ -131,6 +131,8 @@ type (
 	Config struct {
 		// A Table is an optional table name defined for the schema.
 		Table string
+		// a comment
+		Comment string
 	}
 
 	// The Mixin type describes a set of methods that can extend

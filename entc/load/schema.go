@@ -19,6 +19,7 @@ import (
 // Schema represents an ent.Schema that was loaded from a complied user package.
 type Schema struct {
 	Name        string                 `json:"name,omitempty"`
+	Comment     string                 `json:"comment,omitempty"`
 	Config      ent.Config             `json:"config,omitempty"`
 	Edges       []*Edge                `json:"edges,omitempty"`
 	Fields      []*Field               `json:"fields,omitempty"`
@@ -177,15 +178,15 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 		Name:        indirect(reflect.TypeOf(schema)).Name(),
 		Annotations: make(map[string]interface{}),
 	}
+	if err := s.loadFields(schema); err != nil {
+		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
+	}
 	if err := s.loadMixin(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
 	}
 	// Schema annotations override mixed-in annotations.
 	for _, at := range schema.Annotations() {
 		s.addAnnotation(at)
-	}
-	if err := s.loadFields(schema); err != nil {
-		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
 	}
 	edges, err := safeEdges(schema)
 	if err != nil {
@@ -246,7 +247,11 @@ func (s *Schema) loadMixin(schema ent.Interface) error {
 				MixedIn:    true,
 				MixinIndex: i,
 			}
-			s.Fields = append(s.Fields, sf)
+			if j == 0 {
+				s.Fields = append([]*Field{sf}, s.Fields...)
+			} else {
+				s.Fields = append(s.Fields, sf)
+			}
 		}
 		edges, err := safeEdges(mx)
 		if err != nil {

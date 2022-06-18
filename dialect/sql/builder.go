@@ -51,6 +51,7 @@ type ColumnBuilder struct {
 	Builder
 	typ    string             // column type.
 	name   string             // column name.
+	remark string             // column description
 	attr   string             // extra attributes.
 	modify bool               // modify existing.
 	fk     *ForeignKeyBuilder // foreign-key constraint.
@@ -62,6 +63,12 @@ type ColumnBuilder struct {
 //	sql.Column("group_id").Type("int").Attr("UNIQUE")
 //
 func Column(name string) *ColumnBuilder { return &ColumnBuilder{name: name} }
+
+// Type sets the column type.
+func (c *ColumnBuilder) Remark(r string) *ColumnBuilder {
+	c.remark = r
+	return c
+}
 
 // Type sets the column type.
 func (c *ColumnBuilder) Type(t string) *ColumnBuilder {
@@ -113,6 +120,7 @@ func (c *ColumnBuilder) Query() (string, []interface{}) {
 		c.WriteString(" CHECK ")
 		c.Nested(c.check)
 	}
+	c.WriteString(" COMMENT '" + c.remark + "'")
 	return c.String(), c.args
 }
 
@@ -120,6 +128,7 @@ func (c *ColumnBuilder) Query() (string, []interface{}) {
 type TableBuilder struct {
 	Builder
 	name        string           // table name.
+	remark      string           // table description
 	exists      bool             // check existence.
 	charset     string           // table charset.
 	collation   string           // table collation.
@@ -140,6 +149,12 @@ type TableBuilder struct {
 //		PrimaryKey("id")
 //
 func CreateTable(name string) *TableBuilder { return &TableBuilder{name: name} }
+
+// IfNotExists appends the `IF NOT EXISTS` clause to the `CREATE TABLE` statement.
+func (t *TableBuilder) Remark(r string) *TableBuilder {
+	t.remark = r
+	return t
+}
 
 // IfNotExists appends the `IF NOT EXISTS` clause to the `CREATE TABLE` statement.
 func (t *TableBuilder) IfNotExists() *TableBuilder {
@@ -250,6 +265,7 @@ func (t *TableBuilder) Query() (string, []interface{}) {
 	if t.options != "" {
 		t.WriteString(" " + t.options)
 	}
+	t.WriteString(" COMMENT = '" + t.remark + "'")
 	return t.String(), t.args
 }
 

@@ -176,7 +176,7 @@ func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, t *Table, expect
 
 // tBuilder returns the MySQL DSL query for table creation.
 func (d *MySQL) tBuilder(t *Table) *sql.TableBuilder {
-	b := sql.CreateTable(t.Name).IfNotExists()
+	b := sql.CreateTable(t.Name).Remark(t.Remark).IfNotExists()
 	for _, c := range t.Columns {
 		b.Column(d.addColumn(c))
 	}
@@ -290,7 +290,7 @@ func (d *MySQL) cType(c *Column) (t string) {
 // addColumn returns the DSL query for adding the given column to a table.
 // The syntax/order is: datatype [Charset] [Unique|Increment] [Collation] [Nullable].
 func (d *MySQL) addColumn(c *Column) *sql.ColumnBuilder {
-	b := sql.Column(c.Name).Type(d.cType(c)).Attr(c.Attr)
+	b := sql.Column(c.Name).Remark(c.Remark).Type(d.cType(c)).Attr(c.Attr)
 	c.unique(b)
 	if c.Increment {
 		b.Attr("AUTO_INCREMENT")

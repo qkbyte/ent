@@ -273,6 +273,14 @@ func (t Type) Table() string {
 	return snake(rules.Pluralize(t.Name))
 }
 
+// Table returns SQL table name of the node/type.
+func (t Type) Comment() string {
+	if t.schema != nil && t.schema.Config.Comment != "" {
+		return t.schema.Config.Comment
+	}
+	return snake(rules.Pluralize(t.Name))
+}
+
 // EntSQL returns the EntSQL annotation if exists.
 func (t Type) EntSQL() *entsql.Annotation {
 	return entsqlAnnotate(t.Annotations)
@@ -1221,6 +1229,7 @@ func (f Field) Column() *schema.Column {
 		Nullable: f.Optional,
 		Size:     f.size(),
 		Enums:    f.EnumValues(),
+		Remark:   f.Comment(),
 	}
 	switch {
 	case f.Default && (f.Type.Numeric() || f.Type.Type == field.TypeBool):
@@ -1265,6 +1274,7 @@ func (f Field) PK() *schema.Column {
 		Type:      f.Type.Type,
 		Key:       schema.PrimaryKey,
 		Increment: false,
+		Remark:    f.Comment(),
 	}
 	// If the PK was defined by the user and it's UUID or string.
 	if f.UserDefined && !f.Type.Numeric() {
@@ -1711,6 +1721,14 @@ func (r Relation) Column() string {
 		panic(fmt.Sprintf("missing column for Relation.Table: %s", r.Table))
 	}
 	return r.Columns[0]
+}
+
+// Column returns the first element from the columns slice.
+func (r Relation) Remark() string {
+	if r.fk == nil || r.fk.Field == nil {
+		return ""
+	}
+	return r.fk.Field.Comment()
 }
 
 // StructField returns the struct member of the foreign-key in the generated model.

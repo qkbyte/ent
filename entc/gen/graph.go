@@ -444,6 +444,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 	tables := make(map[string]*schema.Table)
 	for _, n := range g.Nodes {
 		table := schema.NewTable(n.Table()).
+			SetRemark(n.Comment()).
 			AddPrimary(n.ID.PK()).
 			SetAnnotation(n.EntSQL())
 		for _, f := range n.Fields {
@@ -459,12 +460,12 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 		}
 		if !userDefDeleted {
 			table.AddColumn(&schema.Column{
-				Name: "is_deleted", Type: field.TypeBool, Default: false,
+				Name: "is_deleted", Type: field.TypeBool, Default: false, Remark: "软删除标记",
 			})
 		}
 		if !userDefVersion {
 			table.AddColumn(&schema.Column{
-				Name: "version", Type: field.TypeUint64, Default: 1,
+				Name: "version", Type: field.TypeUint64, Default: 1, Remark: "版本",
 			})
 		}
 		tables[table.Name] = table
@@ -482,7 +483,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				// the foreign-key on) and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
 				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, SchemaType: pk.SchemaType, Nullable: true}
+				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Remark: e.Rel.Remark(), Unique: e.Rel.Type == O2O, SchemaType: pk.SchemaType, Nullable: true}
 				// If it's not a circular reference (self-referencing table),
 				// and the inverse edge is required, make it non-nullable.
 				if n != e.Type && e.Ref != nil && !e.Ref.Optional {
@@ -499,7 +500,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
 				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, SchemaType: pk.SchemaType, Nullable: true}
+				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Remark: e.Rel.Remark(), SchemaType: pk.SchemaType, Nullable: true}
 				// If it's not a circular reference (self-referencing table),
 				// and the edge is non-optional (required), make it non-nullable.
 				if n != e.Type && !e.Optional {

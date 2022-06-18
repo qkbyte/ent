@@ -31,7 +31,7 @@ var (
 		// {{ $columns }} holds the columns for the "{{ $t.Name }}" table.
 		{{ $columns }} = []*schema.Column{
 			{{- range $c := $t.Columns }}
-				{ Name: "{{ $c.Name }}", Type: field.{{ $c.Type.ConstName }},
+				{ Name: "{{ $c.Name }}", Type: field.{{ $c.Type.ConstName }}, Remark: "{{ $c.Remark }}",
 				{{- if $c.Unique }} Unique: true,{{ end }}
 				{{- if $c.Increment }} Increment: true,{{ end }}
 				{{- if $c.Nullable }} Nullable: {{ $c.Nullable }},{{ end }}
@@ -47,6 +47,7 @@ var (
 		// {{ $table }} holds the schema information for the "{{ $t.Name }}" table.
 		{{ $table }} = &schema.Table{
 			Name: "{{ $t.Name }}",
+			Remark: "{{ $t.Remark }}",
 			Columns: {{ $columns }},
 			PrimaryKey: []*schema.Column{
 				{{- range $pk := $t.PrimaryKey }}
