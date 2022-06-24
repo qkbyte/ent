@@ -110,6 +110,26 @@ func DescribeCmd() *cobra.Command {
 	}
 }
 
+// MessageCmd returns the message command for ent/c packages.
+func MessageCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "message [flags] path",
+		Short: "printer a grpc message of the graph schema",
+		Example: examples(
+			"ent message ./ent/schema",
+			"ent message github.com/a8m/x",
+		),
+		Args: cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, path []string) {
+			graph, err := entc.LoadGraph(path[0], &gen.Config{})
+			if err != nil {
+				log.Fatalln(err)
+			}
+			printer.Fmessage(os.Stdout, graph)
+		},
+	}
+}
+
 // GenerateCmd returns the generate command for ent/c packages.
 func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 	var (

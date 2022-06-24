@@ -18,6 +18,7 @@ func main() {
 	cmd.AddCommand(
 		base.InitCmd(),
 		base.DescribeCmd(),
+		base.MessageCmd(),
 		base.GenerateCmd(),
 	)
 	_ = cmd.Execute()

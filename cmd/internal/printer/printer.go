@@ -28,6 +28,18 @@ func (p Config) Print(g *gen.Graph) {
 	}
 }
 
+// Print prints a table grpc message of the graph to the given writer.
+func (p Config) Message(g *gen.Graph) {
+	for _, n := range g.Nodes {
+		p.grpc(n)
+	}
+}
+
+// Fmessage executes "pretty-printer" on the given writer.
+func Fmessage(w io.Writer, g *gen.Graph) {
+	Config{Writer: w}.Message(g)
+}
+
 // Fprint executes "pretty-printer" on the given writer.
 func Fprint(w io.Writer, g *gen.Graph) {
 	Config{Writer: w}.Print(g)
@@ -46,7 +58,7 @@ func (p Config) node(t *gen.Type) {
 		table  = tablewriter.NewWriter(&b)
 		header = []string{"Field", "Type", "FieldComment", "Unique", "Optional", "Nillable", "Default", "UpdateDefault", "Immutable", "StructTag", "Validators"}
 	)
-	b.WriteString(t.Name + ":\n")
+	b.WriteString(fmt.Sprintf("%s(%s):\n", t.Name, t.Comment()))
 	table.SetAutoFormatHeaders(false)
 	table.SetHeader(header)
 	for _, f := range append([]*gen.Field{t.ID}, t.Fields...) {
@@ -81,4 +93,44 @@ func (p Config) node(t *gen.Type) {
 		table.Render()
 	}
 	io.WriteString(p, strings.ReplaceAll(b.String(), "\n", "\n\t")+"\n")
+}
+
+// grpc returns grpc message of a type. The format of the message is:
+//
+//	Type:
+//			<Fields Table>
+//
+//			<Edges Table>
+//
+func (p Config) grpc(t *gen.Type) {
+	var b strings.Builder
+	b.WriteString("//" + t.Comment() + "\n")
+	b.WriteString("message " + t.Name + "{\n")
+	var index = 0
+	for i, f := range append([]*gen.Field{t.ID}, t.Fields...) {
+		b.WriteString("    // " + f.FieldComment + "\n")
+		tp := fmt.Sprint(f.Type)
+		switch tp {
+		case "float64":
+			tp = "double"
+		case "uint8":
+			tp = "uint32"
+		case "string", "uint64", "bool":
+			break
+		default:
+			tp = "string"
+		}
+		b.WriteString(fmt.Sprintf("    %s    %s = %d", tp, f.Name, i+1) + ";\n")
+		index++
+	}
+	for x, e := range t.Edges {
+		b.WriteString("    // " + e.EdgeComment + "\n")
+		b.WriteString("    ")
+		if !e.Unique {
+			b.WriteString("repeated ")
+		}
+		b.WriteString(fmt.Sprintf("%s    %s = %d", e.Type.Name, e.Name, index+x+1) + ";\n")
+	}
+	b.WriteString("}\n")
+	io.WriteString(p, b.String())
 }
