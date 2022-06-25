@@ -950,6 +950,18 @@ func (f Field) StructField() string {
 	return pascal(f.Name)
 }
 
+// StructField returns the struct member of the field in the model.
+func (f Field) Message() string {
+	switch f.Type.String() {
+	case "uint64", "string", "float64", "bool":
+		return "t." + f.StructField()
+	case "uint8":
+		return "uint32(t." + f.StructField() + ")"
+	default:
+		return "t." + f.StructField() + ".String()"
+	}
+}
+
 // EnumNames returns the enum values of a field.
 func (f Field) EnumNames() []string {
 	names := make([]string, 0, len(f.Enums))
