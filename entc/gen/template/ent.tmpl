@@ -65,29 +65,6 @@ type {{ $.Name }}Edges struct {
 	loadedTypes [{{ len . }}]bool
 }
 
-// ToMessage returns grpc message
-func(t *{{ $.Name }}) ToMessage() *kernel.{{ $.Name }}{
-	k:= &kernel.{{ $.Name }}{
-		{{- range $f := $.Fields }}
-		{{ $f.StructField }}: {{ $f.Message }},
-		{{- end }}
-	}
-	{{- range $e := $.Edges }}
-	{{- if not $e.Unique }} 
-	if len(t.Edges.{{ $e.StructField }}) > 0 {
-		for _,item:= range t.Edges.{{ $e.StructField }} {
-			k.{{ $e.StructField }} = append(k.{{ $e.StructField }}, item.ToMessage())
-		}
-	}
-	{{- else }} 
-	if t.Edges.{{ $e.StructField }} != nil {
-		k.{{ $e.StructField }} = t.Edges.{{ $e.StructField }}.ToMessage()
-	}
-	{{- end}}
-	{{- end }}
-	return k
-}
-
 {{- range $i, $e := . }}
 	// {{ $e.StructField }}OrErr returns the {{ $e.StructField }} value or an error if the edge
 	// was not loaded in eager-loading{{ if $e.Unique }}, or loaded but was not found{{ end }}.
@@ -197,6 +174,30 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 		{{- end }}
 		builder.WriteByte(')')
 		return builder.String()
+	}
+	
+	// ToMessage returns grpc message
+	func(t *{{ $.Name }}) ToMessage() *kernel.{{ $.Name }}{
+		k:= &kernel.{{ $.Name }}{
+			Id: t.ID,
+			{{- range $f := $.Fields }}
+			{{ $f.StructField }}: {{ $f.Message }},
+			{{- end }}
+		}
+		{{- range $e := $.Edges }}
+		{{- if not $e.Unique }} 
+		if len(t.Edges.{{ $e.StructField }}) > 0 {
+			for _,item:= range t.Edges.{{ $e.StructField }} {
+				k.{{ $e.StructField }} = append(k.{{ $e.StructField }}, item.ToMessage())
+			}
+		}
+		{{- else }} 
+		if t.Edges.{{ $e.StructField }} != nil {
+			k.{{ $e.StructField }} = t.Edges.{{ $e.StructField }}.ToMessage()
+		}
+		{{- end}}
+		{{- end }}
+		return k
 	}
 {{ end }}
 

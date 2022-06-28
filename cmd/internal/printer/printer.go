@@ -131,6 +131,30 @@ func (p Config) grpc(t *gen.Type) {
 		}
 		b.WriteString(fmt.Sprintf("%s    %s = %d", e.Type.Name, e.Name, index+x+1) + ";\n")
 	}
-	b.WriteString("}\n")
+	b.WriteString("}\n\n")
+	io.WriteString(p, b.String())
+	p.array(t)
+}
+
+// array returns grpc message of a type array. The format of the message is:
+//
+//	Type:
+//			<Fields Table>
+//
+//			<Edges Table>
+//
+func (p Config) array(t *gen.Type) {
+	var b strings.Builder
+	b.WriteString("//" + t.Comment() + "查询返回集合\n")
+	b.WriteString("message " + t.Name + "Aarry{\n")
+	b.WriteString("    // 便宜量\n")
+	b.WriteString("    int32 offset = 1;\n")
+	b.WriteString("    // 最大数量\n")
+	b.WriteString("    int32 limit = 2;\n")
+	b.WriteString("    // 总数\n")
+	b.WriteString("    int32 total = 3;\n")
+	b.WriteString("    // 结果\n")
+	b.WriteString("    repeated " + t.Name + " result = 4;\n")
+	b.WriteString("}\n\n")
 	io.WriteString(p, b.String())
 }
