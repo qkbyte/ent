@@ -146,7 +146,7 @@ func (p Config) grpc(t *gen.Type) {
 func (p Config) array(t *gen.Type) {
 	var b strings.Builder
 	b.WriteString("//" + t.Comment() + "查询返回集合\n")
-	b.WriteString("message " + t.Name + "Aarry{\n")
+	b.WriteString("message " + t.Name + "Array{\n")
 	b.WriteString("    // 便宜量\n")
 	b.WriteString("    int32 offset = 1;\n")
 	b.WriteString("    // 最大数量\n")
