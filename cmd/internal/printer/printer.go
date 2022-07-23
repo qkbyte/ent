@@ -115,8 +115,9 @@ func (p Config) grpc(t *gen.Type) {
 			tp = "double"
 		case "uint8":
 			tp = "uint32"
-		case "string", "uint64", "bool":
-			break
+		case "string", "bool":
+		case "uint64":
+			b.WriteString(`    // @gotags: json:"` + f.Name + `,string,omitempty"` + "\n")
 		default:
 			tp = "string"
 		}
