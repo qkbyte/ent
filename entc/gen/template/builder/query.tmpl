@@ -114,7 +114,7 @@ func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}
 // FirstX is like First, but panics if an error occurs.
 func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }} {
 	node, err := {{ $receiver }}.First(ctx)
-	if err != nil && !IsNotFound(err) {
+	if err != nil {
 		panic(err)
 	}
 	return node
@@ -137,7 +137,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstID(ctx context.Context) (id {{ $.ID.
 // FirstIDX is like FirstID, but panics if an error occurs.
 func ({{ $receiver }} *{{ $builder }}) FirstIDX(ctx context.Context) {{ $.ID.Type }} {
 	id, err := {{ $receiver }}.FirstID(ctx)
-	if err != nil && !IsNotFound(err) {
+	if err != nil {
 		panic(err)
 	}
 	return id
