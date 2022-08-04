@@ -20,12 +20,12 @@ func columnChecker(table string) func(string) error {
 	check, ok := checks[table]
 	if !ok {
 		return func(string) error {
-			return fmt.Errorf("unknown table %q", table)
+			return fmt.Errorf("未知的表 %q", table)
 		}
 	}
 	return func(column string) error {
 		if !check(column) {
-			return fmt.Errorf("unknown column %q for table %q", column, table)
+			return fmt.Errorf("未知的列 %q 在表 %q 中", column, table)
 		}
 		return nil
 	}

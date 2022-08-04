@@ -473,7 +473,7 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v in
 		case 0:
 			err = &NotFoundError{ {{ $.Package }}.Label}
 		default:
-			err = fmt.Errorf("{{ $pkg }}: {{ $groupBuilder }}.{{ $plural }} returned %d results when one was expected", len(v))
+			err = fmt.Errorf("{{ $pkg }}: {{ $groupBuilder }}.{{ $plural }} 返回结果集不唯一,数量%d", len(v))
 		}
 		return
 	}
@@ -557,7 +557,7 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) ScanX(ctx context.Context, v 
 		case 0:
 			err = &NotFoundError{ {{ $.Package }}.Label}
 		default:
-			err = fmt.Errorf("{{ $pkg }}: {{ $selectBuilder }}.{{ $plural }} returned %d results when one was expected", len(v))
+			err = fmt.Errorf("{{ $pkg }}: {{ $selectBuilder }}.{{ $plural }} 返回结果不唯一,数量 %d", len(v))
 		}
 		return
 	}

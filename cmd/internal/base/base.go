@@ -41,7 +41,7 @@ func (t *IDType) Set(s string) error {
 	case field.TypeString.String():
 		*t = IDType(field.TypeString)
 	default:
-		return fmt.Errorf("invalid type %q", s)
+		return fmt.Errorf("错误的类型 %q", s)
 	}
 	return nil
 }
@@ -75,14 +75,14 @@ func InitCmd() *cobra.Command {
 		Args: func(_ *cobra.Command, names []string) error {
 			for _, name := range names {
 				if !unicode.IsUpper(rune(name[0])) {
-					return errors.New("schema names must begin with uppercase")
+					return errors.New("名称必须首字母大写")
 				}
 			}
 			return nil
 		},
 		Run: func(cmd *cobra.Command, names []string) {
 			if err := initEnv(target, names); err != nil {
-				log.Fatalln(fmt.Errorf("ent/init: %w", err))
+				log.Fatalln(fmt.Errorf("初始化错误: %w", err))
 			}
 		},
 	}
@@ -198,22 +198,22 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 // initEnv initialize an environment for ent codegen.
 func initEnv(target string, names []string) error {
 	if err := createDir(target); err != nil {
-		return fmt.Errorf("create dir %s: %w", target, err)
+		return fmt.Errorf("创建目录 %s: %w", target, err)
 	}
 	for _, name := range names {
 		if err := gen.ValidSchemaName(name); err != nil {
-			return fmt.Errorf("init schema %s: %w", name, err)
+			return fmt.Errorf("初始化模式 %s: %w", name, err)
 		}
 		if fileExists(target, name) {
-			return fmt.Errorf("init schema %s: already exists", name)
+			return fmt.Errorf("初始化模式 %s: already exists", name)
 		}
 		b := bytes.NewBuffer(nil)
 		if err := tmpl.Execute(b, name); err != nil {
-			return fmt.Errorf("executing template %s: %w", name, err)
+			return fmt.Errorf("执行模板 %s: %w", name, err)
 		}
 		newFileTarget := filepath.Join(target, strings.ToLower(name+".go"))
 		if err := os.WriteFile(newFileTarget, b.Bytes(), 0644); err != nil {
-			return fmt.Errorf("writing file %s: %w", newFileTarget, err)
+			return fmt.Errorf("写入文件 %s: %w", newFileTarget, err)
 		}
 	}
 	return nil
@@ -225,7 +225,7 @@ func createDir(target string) error {
 		return err
 	}
 	if err := os.MkdirAll(target, os.ModePerm); err != nil {
-		return fmt.Errorf("creating schema directory: %w", err)
+		return fmt.Errorf("创建模式目录: %w", err)
 	}
 	if target != defaultSchema {
 		return nil

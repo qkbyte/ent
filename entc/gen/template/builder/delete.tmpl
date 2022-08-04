@@ -46,7 +46,7 @@ func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*{{ $.MutationName }})
 			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
+				return nil, fmt.Errorf("意外突变类型 %T", m)
 			}
 			{{ $mutation }} = mutation
 			affected, err = {{ $receiver }}.{{ $.Storage }}Exec(ctx)
@@ -55,7 +55,7 @@ func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
 		})
 		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
 			if {{ $receiver }}.hooks[i] == nil {
-				return 0, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
+				return 0, fmt.Errorf("{{ $pkg }}: 未初始化挂钩 (forgotten import {{ $pkg }}/runtime?)")
 			}
 			mut = {{ $receiver }}.hooks[i](mut)
 		}

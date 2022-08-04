@@ -42,7 +42,7 @@ func NewInspect(d dialect.Driver, opts ...InspectOption) (*Inspector, error) {
 	case dialect.Postgres:
 		i.sqlDialect = &Postgres{Driver: d, schema: i.schema}
 	default:
-		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", d.Dialect())
+		return nil, fmt.Errorf("模式SQL: 不支持的驱动类型 %q", d.Dialect())
 	}
 	return i, nil
 }
@@ -77,7 +77,7 @@ func (i *Inspector) Tables(ctx context.Context) ([]*Table, error) {
 func (i *Inspector) tables(ctx context.Context) ([]string, error) {
 	t, ok := i.sqlDialect.(interface{ tables() sql.Querier })
 	if !ok {
-		return nil, fmt.Errorf("sql/schema: %q driver does not support inspection", i.Dialect())
+		return nil, fmt.Errorf("模式SQL: %q 驱动程序不支持检查", i.Dialect())
 	}
 	query, args := t.tables().Query()
 	var (
@@ -85,7 +85,7 @@ func (i *Inspector) tables(ctx context.Context) ([]string, error) {
 		rows  = &sql.Rows{}
 	)
 	if err := i.Query(ctx, query, args, rows); err != nil {
-		return nil, fmt.Errorf("%q driver: reading table names %w", i.Dialect(), err)
+		return nil, fmt.Errorf("%q 驱动: 读取表名 %w", i.Dialect(), err)
 	}
 	defer rows.Close()
 	if err := sql.ScanSlice(rows, &names); err != nil {

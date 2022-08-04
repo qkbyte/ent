@@ -13,7 +13,7 @@ in the LICENSE file in the root directory of this source tree.
 func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, v interface{}) error {
 	for _, f := range {{ $receiver }}.fields {
 		if !{{ $.Package }}.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+			return &ValidationError{Name: f, err: fmt.Errorf("错误的字段 %q 对于分组字段", f)}
 		}
 	}
 	selector := {{ $receiver }}.sqlQuery()

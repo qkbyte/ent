@@ -268,10 +268,10 @@ func (m *Migrate) setupAtlas() error {
 		return nil
 	}
 	if !m.withForeignKeys {
-		return errors.New("sql/schema: WithForeignKeys(false) does not work in Atlas migration")
+		return errors.New("模式SQL: WithForeignKeys(false) does not work in Atlas migration")
 	}
 	if m.withFixture {
-		return errors.New("sql/schema: WithFixture(true) does not work in Atlas migration")
+		return errors.New("模式SQL: WithFixture(true) does not work in Atlas migration")
 	}
 	skip := DropIndex | DropColumn
 	if m.atlas.skip != NoChange {
@@ -415,7 +415,7 @@ func (m *Migrate) aTables(ctx context.Context, b atBuilder, conn dialect.ExecQue
 			for _, c1 := range fk1.Columns {
 				c2, ok := t2.Column(c1.Name)
 				if !ok {
-					return nil, fmt.Errorf("unexpected fk %q column: %q", fk1.Symbol, c1.Name)
+					return nil, fmt.Errorf("想不到的外键 %q column: %q", fk1.Symbol, c1.Name)
 				}
 				fk2.AddColumns(c2)
 			}
@@ -427,13 +427,13 @@ func (m *Migrate) aTables(ctx context.Context, b atBuilder, conn dialect.ExecQue
 				}
 			}
 			if refT == nil {
-				return nil, fmt.Errorf("unexpected fk %q ref-table: %q", fk1.Symbol, fk1.RefTable.Name)
+				return nil, fmt.Errorf("想不到的外键 %q ref-table: %q", fk1.Symbol, fk1.RefTable.Name)
 			}
 			fk2.SetRefTable(refT)
 			for _, c1 := range fk1.RefColumns {
 				c2, ok := refT.Column(c1.Name)
 				if !ok {
-					return nil, fmt.Errorf("unexpected fk %q ref-column: %q", fk1.Symbol, c1.Name)
+					return nil, fmt.Errorf("想不到的外键 %q ref-column: %q", fk1.Symbol, c1.Name)
 				}
 				fk2.AddRefColumns(c2)
 			}
@@ -479,7 +479,7 @@ func (m *Migrate) aIndexes(b atBuilder, t1 *Table, t2 *schema.Table) error {
 	for _, c1 := range t1.PrimaryKey {
 		c2, ok := t2.Column(c1.Name)
 		if !ok {
-			return fmt.Errorf("unexpected primary-key column: %q", c1.Name)
+			return fmt.Errorf("主键列异常: %q", c1.Name)
 		}
 		pk = append(pk, c2)
 	}

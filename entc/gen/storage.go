@@ -75,7 +75,7 @@ func NewStorage(s string) (*Storage, error) {
 			return d, nil
 		}
 	}
-	return nil, fmt.Errorf("entc/gen: invalid storage driver %q", s)
+	return nil, fmt.Errorf("entc/gen: 无效的存储驱动程序 %q", s)
 }
 
 // String implements the fmt.Stringer interface for template usage.

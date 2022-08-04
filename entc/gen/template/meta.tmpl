@@ -134,7 +134,7 @@ const (
 			case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ if $f.HasGoType }}"{{ $e.Value }}"{{ else }}{{ $e.Name }}{{ end }}{{ end }}:
 				return nil
 			default:
-				return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $receiver }})
+				return fmt.Errorf("{{ $.Package }}: 错误的枚举值 {{ $f.Name }} 字段: %q", {{ $receiver }})
 		}
 	}
 {{ end }}

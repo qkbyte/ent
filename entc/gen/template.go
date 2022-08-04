@@ -396,7 +396,7 @@ func (d *Dependency) defaultName() (string, error) {
 			pkg = parts[0]
 		}
 	default:
-		return "", fmt.Errorf("entc/gen: unexpected number of parts: %q", parts)
+		return "", fmt.Errorf("entc/gen: 意外的部分数量: %q", parts)
 	}
 	if r := d.Type.RType; r != nil && (r.Kind == reflect.Array || r.Kind == reflect.Slice) {
 		name = plural(name)

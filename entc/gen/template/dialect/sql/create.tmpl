@@ -34,7 +34,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 					return nil, err
 			{{- else  }}
 				} else {
-					return nil, fmt.Errorf("unexpected {{ $.Name }}.ID type: %T", _spec.ID.Value)
+					return nil, fmt.Errorf("意外的 {{ $.Name }}.ID 类型: %T", _spec.ID.Value)
 			{{- end }}
 				}
 		}
@@ -144,7 +144,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*{{ $.MutationName }})
 				if !ok {
-					return nil, fmt.Errorf("unexpected mutation type %T", m)
+					return nil, fmt.Errorf("意外突变类型 %T", m)
 				}
 				if err := builder.check(); err != nil {
 					return nil, err

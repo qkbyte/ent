@@ -16,10 +16,10 @@ import (
 func ScanOne(rows ColumnScanner, v interface{}) error {
 	columns, err := rows.Columns()
 	if err != nil {
-		return fmt.Errorf("sql/scan: failed getting column names: %w", err)
+		return fmt.Errorf("扫描SQL: 获取列名称失败: %w", err)
 	}
 	if n := len(columns); n != 1 {
-		return fmt.Errorf("sql/scan: unexpected number of columns: %d", n)
+		return fmt.Errorf("扫描SQL: 列数量异常: %d", n)
 	}
 	if !rows.Next() {
 		if err := rows.Err(); err != nil {
@@ -31,7 +31,7 @@ func ScanOne(rows ColumnScanner, v interface{}) error {
 		return err
 	}
 	if rows.Next() {
-		return fmt.Errorf("sql/scan: expect exactly one row in result set")
+		return fmt.Errorf("扫描SQL: 结果集中只需要一行")
 	}
 	return rows.Err()
 }
@@ -76,33 +76,33 @@ func ScanValue(rows ColumnScanner) (driver.Value, error) {
 func ScanSlice(rows ColumnScanner, v interface{}) error {
 	columns, err := rows.Columns()
 	if err != nil {
-		return fmt.Errorf("sql/scan: failed getting column names: %w", err)
+		return fmt.Errorf("扫描SQL: 获取列名失败: %w", err)
 	}
 	rv := reflect.ValueOf(v)
 	switch {
 	case rv.Kind() != reflect.Ptr:
 		if t := reflect.TypeOf(v); t != nil {
-			return fmt.Errorf("sql/scan: ScanSlice(non-pointer %s)", t)
+			return fmt.Errorf("扫描SQL: ScanSlice(non-pointer %s)", t)
 		}
 		fallthrough
 	case rv.IsNil():
-		return fmt.Errorf("sql/scan: ScanSlice(nil)")
+		return fmt.Errorf("扫描SQL: ScanSlice(nil)")
 	}
 	rv = reflect.Indirect(rv)
 	if k := rv.Kind(); k != reflect.Slice {
-		return fmt.Errorf("sql/scan: invalid type %s. expected slice as an argument", k)
+		return fmt.Errorf("扫描SQL: 类型错误 %s. 应将切片作为参数", k)
 	}
 	scan, err := scanType(rv.Type().Elem(), columns)
 	if err != nil {
 		return err
 	}
 	if n, m := len(columns), len(scan.columns); n > m {
-		return fmt.Errorf("sql/scan: columns do not match (%d > %d)", n, m)
+		return fmt.Errorf("扫描SQL: 列不匹配 (%d > %d)", n, m)
 	}
 	for rows.Next() {
 		values := scan.values()
 		if err := rows.Scan(values...); err != nil {
-			return fmt.Errorf("sql/scan: failed scanning rows: %w", err)
+			return fmt.Errorf("扫描SQL: 扫描行失败: %w", err)
 		}
 		vv := reflect.Append(rv, scan.value(values...))
 		rv.Set(vv)
@@ -142,7 +142,7 @@ func scanType(typ reflect.Type, columns []string) (*rowScan, error) {
 	case k == reflect.Struct:
 		return scanStruct(typ, columns)
 	default:
-		return nil, fmt.Errorf("sql/scan: unsupported type ([]%s)", k)
+		return nil, fmt.Errorf("扫描SQL: 不支持的类型 ([]%s)", k)
 	}
 }
 
@@ -188,7 +188,7 @@ func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 		name := strings.ToLower(strings.Split(c, "(")[0])
 		idx, ok := names[name]
 		if !ok {
-			return nil, fmt.Errorf("sql/scan: missing struct field for column: %s (%s)", c, name)
+			return nil, fmt.Errorf("扫描SQL: 列缺少结构字段: %s (%s)", c, name)
 		}
 		idxs = append(idxs, idx)
 		rtype := typ.Field(idx[0]).Type

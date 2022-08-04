@@ -440,7 +440,7 @@ type NotFoundError struct {
 }
 
 func (e *NotFoundError) Error() string {
-	return fmt.Sprintf("record with id %v not found in table %s", e.id, e.table)
+	return fmt.Sprintf("对于id为 %v 的记录没有在表 %s 中找到", e.id, e.table)
 }
 
 // DeleteSpec holds the information for delete one

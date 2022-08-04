@@ -105,7 +105,7 @@ type NotFoundError struct {
 
 // Error implements the error interface.
 func (e *NotFoundError) Error() string {
-	return "{{ $pkg }}: " + e.label + " not found"
+	return "{{ $pkg }}: " + e.label + " 没有找到"
 }
 
 // IsNotFound returns a boolean indicating whether the error is a not found error.

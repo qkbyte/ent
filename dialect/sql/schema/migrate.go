@@ -130,7 +130,7 @@ func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
 	case dialect.Postgres:
 		m.sqlDialect = &Postgres{Driver: d}
 	default:
-		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", d.Dialect())
+		return nil, fmt.Errorf("模式SQL: 不支持的映射 %q", d.Dialect())
 	}
 	if err := m.setupAtlas(); err != nil {
 		return nil, err
@@ -211,7 +211,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 			}
 			change, err := m.changeSet(curr, t)
 			if err != nil {
-				return fmt.Errorf("creating changeset for %q: %w", t.Name, err)
+				return fmt.Errorf("为创建变更集 %q: %w", t.Name, err)
 			}
 			if err := m.apply(ctx, tx, t.Name, change); err != nil {
 				return err
@@ -219,7 +219,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 		default: // !exist
 			query, args := m.tBuilder(t).Query()
 			if err := tx.Exec(ctx, query, args, nil); err != nil {
-				return fmt.Errorf("create table %q: %w", t.Name, err)
+				return fmt.Errorf("创建表 %q: %w", t.Name, err)
 			}
 			// If global unique identifier is enabled and it's not
 			// a relation table, allocate a range for the table pk.
@@ -232,7 +232,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 			for _, idx := range t.Indexes {
 				query, args := m.addIndex(idx, t.Name).Query()
 				if err := tx.Exec(ctx, query, args, nil); err != nil {
-					return fmt.Errorf("create index %q: %w", idx.Name, err)
+					return fmt.Errorf("创建索引 %q: %w", idx.Name, err)
 				}
 			}
 		}
@@ -265,7 +265,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 		}
 		query, args := b.Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("create foreign keys for %q: %w", t.Name, err)
+			return fmt.Errorf("创建外键为表 %q: %w", t.Name, err)
 		}
 	}
 	return nil
@@ -284,7 +284,7 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 		}
 		for _, idx := range change.index.drop {
 			if err := m.dropIndex(ctx, tx, idx, table); err != nil {
-				return fmt.Errorf("drop index of table %q: %w", table, err)
+				return fmt.Errorf("删除表索引 %q: %w", table, err)
 			}
 		}
 	}
@@ -297,13 +297,13 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 	for i := range queries {
 		query, args := queries[i].Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("alter table %q: %w", table, err)
+			return fmt.Errorf("变更表 %q: %w", table, err)
 		}
 	}
 	for _, idx := range change.index.add {
 		query, args := m.addIndex(idx, table).Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("create index %q: %w", table, err)
+			return fmt.Errorf("创建索引 %q: %w", table, err)
 		}
 	}
 	return nil
@@ -340,11 +340,11 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 	change := &changes{}
 	// pks.
 	if len(curr.PrimaryKey) != len(new.PrimaryKey) {
-		return nil, fmt.Errorf("cannot change primary key for table: %q", curr.Name)
+		return nil, fmt.Errorf("无法更改表的主键: %q", curr.Name)
 	}
 	for i := range curr.PrimaryKey {
 		if curr.PrimaryKey[i].Name != new.PrimaryKey[i].Name {
-			return nil, fmt.Errorf("cannot change primary key for table: %q", curr.Name)
+			return nil, fmt.Errorf("无法更改表的主键: %q", curr.Name)
 		}
 	}
 	// Add or modify columns.
@@ -357,7 +357,7 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 		case !ok:
 			change.column.add = append(change.column.add, c1)
 		case !c2.Type.Valid():
-			return nil, fmt.Errorf("invalid type %q for column %q", c2.typ, c2.Name)
+			return nil, fmt.Errorf("错误的类型 %q 对于列 %q", c2.typ, c2.Name)
 		// Modify a non-unique column to unique.
 		case c1.Unique && !c2.Unique:
 			// Make sure the table does not have unique index for this column
@@ -381,13 +381,13 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			}
 			idx, ok := curr.index(c2.Name)
 			if !ok {
-				return nil, fmt.Errorf("missing index to drop for unique column %q", c2.Name)
+				return nil, fmt.Errorf("缺少要删除的唯一列的索引 %q", c2.Name)
 			}
 			change.index.drop.append(idx)
 		// Extending column types.
 		case m.needsConversion(c2, c1):
 			if !c2.ConvertibleTo(c1) {
-				return nil, fmt.Errorf("changing column type for %q is invalid (%s != %s)", c1.Name, m.cType(c1), m.cType(c2))
+				return nil, fmt.Errorf("更改的列类型 %q 是错误的 (%s != %s)", c1.Name, m.cType(c1), m.cType(c2))
 			}
 			fallthrough
 		// Change nullability of a column.
@@ -445,7 +445,7 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 	for _, fk := range new.ForeignKeys {
 		ok, err := m.fkExist(ctx, tx, fk.Symbol)
 		if err != nil {
-			return fmt.Errorf("checking foreign-key existence %q: %w", fk.Symbol, err)
+			return fmt.Errorf("检查外键是否存在 %q: %w", fk.Symbol, err)
 		}
 		if !ok {
 			continue
@@ -460,7 +460,7 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 		}
 		query, args := d.renameColumn(curr, &Column{Name: column}, newcol).Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("rename column %q: %w", column, err)
+			return fmt.Errorf("重命名列 %q: %w", column, err)
 		}
 		prev, ok := curr.column(column)
 		if !ok {
@@ -477,7 +477,7 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 				idx2 := &Index{Name: newcol.Name, Unique: true, Columns: []*Column{newcol}}
 				query, args := d.renameIndex(curr, idx, idx2).Query()
 				if err := tx.Exec(ctx, query, args, nil); err != nil {
-					return fmt.Errorf("rename index %q: %w", prev.Name, err)
+					return fmt.Errorf("重命名索引 %q: %w", prev.Name, err)
 				}
 				idx.Name = idx2.Name
 			default:
@@ -500,7 +500,7 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 			if idx.sameAs(idx2) {
 				query, args := d.renameIndex(curr, idx, idx2).Query()
 				if err := tx.Exec(ctx, query, args, nil); err != nil {
-					return fmt.Errorf("rename index %q: %w", idx.Name, err)
+					return fmt.Errorf("重命名索引 %q: %w", idx.Name, err)
 				}
 				idx.Name = idx2.Name
 				break Find
@@ -536,7 +536,7 @@ func (m *Migrate) types(ctx context.Context, tx dialect.ExecQuerier) error {
 			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
 		query, args := m.tBuilder(t).Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("create types table: %w", err)
+			return fmt.Errorf("创建类型表: %w", err)
 		}
 		return nil
 	}
@@ -544,7 +544,7 @@ func (m *Migrate) types(ctx context.Context, tx dialect.ExecQuerier) error {
 	query, args := sql.Dialect(m.Dialect()).
 		Select("type").From(sql.Table(TypeTable)).OrderBy(sql.Asc("id")).Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return fmt.Errorf("query types table: %w", err)
+		return fmt.Errorf("查询类型表: %w", err)
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, &m.typeRanges)
@@ -564,12 +564,12 @@ func (m *Migrate) pkRange(ctx context.Context, conn dialect.ExecQuerier, t *Tabl
 	// the past. Otherwise, allocate a new id-range.
 	if id == -1 {
 		if len(m.typeRanges) > MaxTypes {
-			return 0, fmt.Errorf("max number of types exceeded: %d", MaxTypes)
+			return 0, fmt.Errorf("超出最大类型数: %d", MaxTypes)
 		}
 		query, args := sql.Dialect(m.Dialect()).
 			Insert(TypeTable).Columns("type").Values(t.Name).Query()
 		if err := conn.Exec(ctx, query, args, nil); err != nil {
-			return 0, fmt.Errorf("insert into ent_types: %w", err)
+			return 0, fmt.Errorf("插入到实体类型: %w", err)
 		}
 		id = len(m.typeRanges)
 		m.typeRanges = append(m.typeRanges, t.Name)
@@ -595,12 +595,12 @@ func (m *Migrate) fkColumn(ctx context.Context, tx dialect.Tx, fk *ForeignKey) (
 		Query()
 	rows := &sql.Rows{}
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return "", fmt.Errorf("reading foreign-key %q column: %w", fk.Symbol, err)
+		return "", fmt.Errorf("读取外键关系 %q column: %w", fk.Symbol, err)
 	}
 	defer rows.Close()
 	column, err := sql.ScanString(rows)
 	if err != nil {
-		return "", fmt.Errorf("scanning foreign-key %q column: %w", fk.Symbol, err)
+		return "", fmt.Errorf("扫描外键关系 %q column: %w", fk.Symbol, err)
 	}
 	return column, nil
 }
@@ -647,7 +647,7 @@ func (m *Migrate) symbol(name string) string {
 
 // rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
 func rollback(tx dialect.Tx, err error) error {
-	err = fmt.Errorf("sql/schema: %w", err)
+	err = fmt.Errorf("模式SQL: %w", err)
 	if rerr := tx.Rollback(); rerr != nil {
 		err = fmt.Errorf("%w: %v", err, rerr)
 	}
@@ -658,7 +658,7 @@ func rollback(tx dialect.Tx, err error) error {
 func exist(ctx context.Context, conn dialect.ExecQuerier, query string, args ...interface{}) (bool, error) {
 	rows := &sql.Rows{}
 	if err := conn.Query(ctx, query, args, rows); err != nil {
-		return false, fmt.Errorf("reading schema information %w", err)
+		return false, fmt.Errorf("读取模式信息 %w", err)
 	}
 	defer rows.Close()
 	n, err := sql.ScanInt(rows)

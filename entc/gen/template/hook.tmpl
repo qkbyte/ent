@@ -28,7 +28,7 @@ import "{{ $.Config.Package }}"
 	func (f {{ $name }}) Mutate(ctx context.Context, m {{ $pkg }}.Mutation) ({{ $pkg }}.Value, error) {
 		mv, ok := m.({{ $type }})
 		if !ok {
-			return nil, fmt.Errorf("unexpected mutation type %T. expect {{ $type }}", m)
+			return nil, fmt.Errorf("意外突变类型 %T. 预料 {{ $type }}", m)
 		}
 		return f(ctx, mv)
 	}
@@ -150,7 +150,7 @@ func FixedError(err error) {{ $pkg }}.Hook {
 //	}
 //
 func Reject(op {{ $pkg }}.Op) {{ $pkg }}.Hook {
-	hk := FixedError(fmt.Errorf("%s operation is not allowed", op))
+	hk := FixedError(fmt.Errorf("%s 不允许执行此操作", op))
 	return On(hk, op)
 }
 

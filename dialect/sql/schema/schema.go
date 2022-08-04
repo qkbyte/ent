@@ -247,37 +247,37 @@ func (c *Column) ScanDefault(value string) error {
 	case c.IntType():
 		v := &sql.NullInt64{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning int value for column %q: %w", c.Name, err)
+			return fmt.Errorf("扫描列的整数值 %q: %w", c.Name, err)
 		}
 		c.Default = v.Int64
 	case c.UintType():
 		v := &sql.NullInt64{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning uint value for column %q: %w", c.Name, err)
+			return fmt.Errorf("扫描列的无符号整数值 %q: %w", c.Name, err)
 		}
 		c.Default = uint64(v.Int64)
 	case c.FloatType():
 		v := &sql.NullFloat64{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning float value for column %q: %w", c.Name, err)
+			return fmt.Errorf("扫描列的浮点值 %q: %w", c.Name, err)
 		}
 		c.Default = v.Float64
 	case c.Type == field.TypeBool:
 		v := &sql.NullBool{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning bool value for column %q: %w", c.Name, err)
+			return fmt.Errorf("扫描列的布尔值 %q: %w", c.Name, err)
 		}
 		c.Default = v.Bool
 	case c.Type == field.TypeString || c.Type == field.TypeEnum:
 		v := &sql.NullString{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning string value for column %q: %w", c.Name, err)
+			return fmt.Errorf("扫描列的字符串值 %q: %w", c.Name, err)
 		}
 		c.Default = v.String
 	case c.Type == field.TypeJSON:
 		v := &sql.NullString{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning json value for column %q: %w", c.Name, err)
+			return fmt.Errorf("扫描列的json值 %q: %w", c.Name, err)
 		}
 		c.Default = v.String
 	case c.Type == field.TypeBytes:
@@ -288,7 +288,7 @@ func (c *Column) ScanDefault(value string) error {
 			c.Default = value
 		}
 	default:
-		return fmt.Errorf("unsupported default type: %v default to %q", c.Type, value)
+		return fmt.Errorf("不支持的默认类型: %v 默认为 %q", c.Type, value)
 	}
 	return nil
 }

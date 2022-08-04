@@ -173,7 +173,7 @@ func (m *{{ $mutation }}) IDs(ctx context.Context) ([]{{ $n.ID.Type }}, error) {
 	case m.op.Is(OpUpdate | OpDelete):
 		return m.Client().{{ $n.Name }}.Query().Where(m.predicates...).IDs(ctx)
 	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+		return nil, fmt.Errorf("获取主键针对 %s 是不允许的", m.op)
 	}
 }
 
@@ -212,7 +212,7 @@ func (m *{{ $mutation }}) IDs(ctx context.Context) ([]{{ $n.ID.Type }}, error) {
 		}
 		oldValue, err := m.oldValue(ctx)
 		if err != nil {
-			return v, fmt.Errorf("querying old value for {{ $f.MutationGetOld }}: %w", err)
+			return v, fmt.Errorf("获取历史值 {{ $f.MutationGetOld }} 异常: %w", err)
 		}
 		return oldValue.{{ $f.StructField }}, nil
 	}
@@ -425,7 +425,7 @@ func (m *{{ $mutation }}) OldField(ctx context.Context, name string) (ent.Value,
 		{{- end }}
 		}
 	{{- end }}
-	return nil, fmt.Errorf("unknown {{ $n.Name }} field %s", name)
+	return nil, fmt.Errorf("未知的 {{ $n.Name }} 字段 %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
@@ -438,13 +438,13 @@ func (m *{{ $mutation }}) SetField(name string, value ent.Value) error {
 		case {{ $const }}:
 			v, ok := value.({{ $f.Type }})
 			if !ok {
-				return fmt.Errorf("unexpected type %T for field %s", value, name)
+				return fmt.Errorf("意外类型 %T 对于字段 %s", value, name)
 			}
 			m.Set{{ $f.StructField }}(v)
 			return nil
 	{{- end }}
 	}
-	return fmt.Errorf("unknown {{ $n.Name }} field %s", name)
+	return fmt.Errorf("未知 {{ $n.Name }} 字段 %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
@@ -496,7 +496,7 @@ func (m *{{ $mutation }}) AddField(name string, value ent.Value) error {
 				case {{ $const }}:
 					v, ok := value.({{ $f.SignedType }})
 					if !ok {
-						return fmt.Errorf("unexpected type %T for field %s", value, name)
+						return fmt.Errorf("意外类型 %T 对于字段 %s", value, name)
 					}
 					m.Add{{ $f.StructField }}(v)
 					return nil
@@ -504,7 +504,7 @@ func (m *{{ $mutation }}) AddField(name string, value ent.Value) error {
 		{{- end }}
 		}
 	{{- end }}
-	return fmt.Errorf("unknown {{ $n.Name }} numeric field %s", name)
+	return fmt.Errorf("未知的 {{ $n.Name }} 数值字段 %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
@@ -548,7 +548,7 @@ func (m *{{ $mutation }}) ClearField(name string) error {
 		{{- end }}
 		}
 	{{- end }}
-	return fmt.Errorf("unknown {{ $n.Name }} nullable field %s", name)
+	return fmt.Errorf("未知的 {{ $n.Name }} 可空字段 %s", name)
 }
 
 
@@ -565,7 +565,7 @@ func (m *{{ $mutation }}) ResetField(name string) error {
 		{{- end }}
 		}
 	{{- end }}
-	return fmt.Errorf("unknown {{ $n.Name }} field %s", name)
+	return fmt.Errorf("未知的 {{ $n.Name }} 字段 %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
@@ -682,7 +682,7 @@ func (m *{{ $mutation }}) ClearEdge(name string) error {
 		{{- end }}
 		}
 	{{- end }}
-	return fmt.Errorf("unknown {{ $n.Name }} unique edge %s", name)
+	return fmt.Errorf("未知的 {{ $n.Name }} 唯一边关系 %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
@@ -698,7 +698,7 @@ func (m *{{ $mutation }}) ResetEdge(name string) error {
 		{{- end }}
 		}
 	{{- end }}
-	return fmt.Errorf("unknown {{ $n.Name }} edge %s", name)
+	return fmt.Errorf("未知的 {{ $n.Name }} 边关系 %s", name)
 }
 {{ end }}
 

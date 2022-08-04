@@ -37,7 +37,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.{{ $.ID.Constant }})
 			for _, f := range fields {
 				if !{{ $.Package }}.ValidColumn(f) {
-					return nil, &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
+					return nil, &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: 错误的字段 %q 对于查询", f)}
 				}
 				if f != {{ $.Package }}.{{ $.ID.Constant }} {
 					_spec.Node.Columns = append(_spec.Node.Columns, f)

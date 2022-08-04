@@ -257,7 +257,7 @@ type graphScope struct {
 func extend(v interface{}, kv ...interface{}) (interface{}, error) {
 	scope := make(map[interface{}]interface{})
 	if len(kv)%2 != 0 {
-		return nil, fmt.Errorf("invalid number of parameters: %d", len(kv))
+		return nil, fmt.Errorf("参数数量无效: %d", len(kv))
 	}
 	for i := 0; i < len(kv); i += 2 {
 		scope[kv[i]] = kv[i+1]
@@ -278,7 +278,7 @@ func extend(v interface{}, kv ...interface{}) (interface{}, error) {
 		}
 		return &graphScope{Graph: v.Graph, Scope: scope}, nil
 	default:
-		return nil, fmt.Errorf("invalid type for extend: %T", v)
+		return nil, fmt.Errorf("扩展的类型无效: %T", v)
 	}
 }
 
@@ -329,7 +329,7 @@ func aggregate() map[string]bool {
 // keys returns the given map keys.
 func keys(v reflect.Value) ([]string, error) {
 	if k := v.Type().Kind(); k != reflect.Map {
-		return nil, fmt.Errorf("expect map for keys, got: %s", k)
+		return nil, fmt.Errorf("键的预期映射, 得到了: %s", k)
 	}
 	keys := make([]string, v.Len())
 	for i, v := range v.MapKeys() {

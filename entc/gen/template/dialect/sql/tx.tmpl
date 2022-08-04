@@ -10,13 +10,13 @@ in the LICENSE file in the root directory of this source tree.
 // BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
-		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
+		return nil, fmt.Errorf("ent: 无法在事务中启动事务")
 	}
 	tx, err := c.driver.(interface {
 		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
 	}).BeginTx(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
+		return nil, fmt.Errorf("ent: 启动一个事务: %w", err)
 	}
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}

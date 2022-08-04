@@ -191,7 +191,7 @@ func DenyMutationOperationRule(op {{ $pkg }}.Op) MutationRule {
 		if m, ok := m.({{ $type }}); ok {
 			return f(ctx, m)
 		}
-		return Denyf("{{ $pkg }}/privacy: unexpected mutation type %T, expect {{ $type }}", m)
+		return Denyf("{{ $pkg }}/privacy: 意外突变类型 %T, expect {{ $type }}", m)
 	}
 {{- end }}
 

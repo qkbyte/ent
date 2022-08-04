@@ -70,7 +70,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*{{ $.MutationName }})
 			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
+				return nil, fmt.Errorf("意外突变类型 %T", m)
 			}
 			{{- if $.HasUpdateCheckers }}
 				if err = {{ $receiver }}.check(); err != nil {
@@ -84,7 +84,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 		})
 		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
 			if {{ $receiver }}.hooks[i] == nil {
-				return 0, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
+				return 0, fmt.Errorf("{{ $pkg }}: 未初始化挂钩 (forgotten import {{ $pkg }}/runtime?)")
 			}
 			mut = {{ $receiver }}.hooks[i](mut)
 		}
@@ -179,7 +179,7 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*{{ $.MutationName }})
 			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
+				return nil, fmt.Errorf("意外突变类型 %T", m)
 			}
 			{{- if $.HasUpdateCheckers }}
 				if err = {{ $receiver }}.check(); err != nil {
@@ -193,7 +193,7 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 		})
 		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
 			if {{ $receiver }}.hooks[i] == nil {
-				return nil, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
+				return nil, fmt.Errorf("{{ $pkg }}: 未初始化挂钩 (forgotten import {{ $pkg }}/runtime?)")
 			}
 			mut = {{ $receiver }}.hooks[i](mut)
 		}
@@ -303,7 +303,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 				if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {{ if $f.Optional }} && !{{ $mutation }}.{{ $f.StructField }}Cleared() {{ end }} {
 					{{- if $runtimeRequired }}
 						if {{ $.Package }}.{{ $f.UpdateDefaultName }} == nil {
-							return fmt.Errorf("{{ $pkg }}: uninitialized {{ $.Package }}.{{ $f.UpdateDefaultName }} (forgotten import {{ $pkg }}/runtime?)")
+							return fmt.Errorf("{{ $pkg }}: 未初始化 {{ $.Package }}.{{ $f.UpdateDefaultName }} (forgotten import {{ $pkg }}/runtime?)")
 						}
 					{{- end }}
 					v := {{ $.Package }}.{{ $f.UpdateDefaultName }}()
@@ -325,7 +325,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 				if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					{{- $basic := $f.BasicType "v" }}
 					if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
-						return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
+						return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: 字段验证失败 "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 					}
 				}
 			{{- end }}

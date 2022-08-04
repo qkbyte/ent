@@ -61,7 +61,7 @@ func mutationFilter(m {{ $pkg }}.Mutation) (Filter, error) {
 			return m.Filter(), nil
 	{{- end }}
 	default:
-		return nil, Denyf("{{ $pkg }}/privacy: unexpected mutation type %T for mutation filter", m)
+		return nil, Denyf("{{ $pkg }}/privacy: 意外突变类型 %T for mutation filter", m)
 	}
 }
 {{ end }}

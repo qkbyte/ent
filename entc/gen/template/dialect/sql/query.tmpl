@@ -55,7 +55,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
 		if len(nodes) == 0 {
-			return fmt.Errorf("{{ $pkg }}: Assign called without calling ScanValues")
+			return fmt.Errorf("{{ $pkg }}: Assign调用的值而不调用ScanValue")
 		}
 		node := nodes[len(nodes)-1]
 		{{- with $.Edges }}
@@ -102,7 +102,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, error) {
 	n, err := {{ $receiver }}.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("{{ $pkg }}: check existence: %w", err)
+		return false, fmt.Errorf("{{ $pkg }}: 检查是否存在: %w", err)
 	}
 	return n > 0, nil
 }
@@ -300,17 +300,17 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 				Assign: func(out, in interface{}) error {
 					eout, ok := out.(*{{ $out }})
 					if !ok || eout == nil {
-						return fmt.Errorf("unexpected id value for edge-out")
+						return fmt.Errorf("意外的ID值对于 edge-out")
 					}
 					ein, ok := in.(*{{ $in }})
 					if !ok || ein == nil {
-						return fmt.Errorf("unexpected id value for edge-in")
+						return fmt.Errorf("意外的ID值对于 edge-in")
 					}
 					outValue := {{ with extend $ "Arg" "eout" "Field" $.ID "ScanType" $out }}{{ template "dialect/sql/query/eagerloading/m2massign" . }}{{ end }}
 					inValue := {{ with extend $ "Arg" "ein" "Field" $e.Type.ID "ScanType" $in }}{{ template "dialect/sql/query/eagerloading/m2massign" . }}{{ end }}
 					node, ok := ids[outValue]
 					if !ok {
-						return fmt.Errorf("unexpected node id in edges: %v", outValue)
+						return fmt.Errorf("意外的节点ID对于边: %v", outValue)
 					}
 					if _, ok := edges[inValue]; !ok {
 						edgeids = append(edgeids, inValue)
@@ -326,7 +326,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 				{{- end }}
 			{{- end }}
 			if err := sqlgraph.QueryEdges(ctx, {{ $receiver }}.driver, _spec); err != nil {
-				return nil, fmt.Errorf(`query edges "{{ $e.Name }}": %w`, err)
+				return nil, fmt.Errorf(`查询边 "{{ $e.Name }}": %w`, err)
 			}
 			query.Where({{ $e.Type.Package }}.IDIn(edgeids...))
 			neighbors, err := query.All(ctx)
@@ -336,7 +336,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			for _, n := range neighbors {
 				nodes, ok := edges[n.ID]
 				if !ok {
-					return nil, fmt.Errorf(`unexpected "{{ $e.Name }}" node returned %v`, n.ID)
+					return nil, fmt.Errorf(`意外的 "{{ $e.Name }}" 节点返回 %v`, n.ID)
 				}
 				for i := range nodes {
 					nodes[i].Edges.{{ $e.StructField }} = append(nodes[i].Edges.{{ $e.StructField }}, n)
@@ -366,7 +366,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			for _, n := range neighbors {
 				nodes, ok := nodeids[n.ID]
 				if !ok {
-					return nil, fmt.Errorf(`unexpected foreign-key "{{ $fk.Field.Name }}" returned %v`, n.ID)
+					return nil, fmt.Errorf(`意外的外键 "{{ $fk.Field.Name }}" 返回 %v`, n.ID)
 				}
 				for i := range nodes {
 					nodes[i].Edges.{{ $e.StructField }} = n
@@ -397,12 +397,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 				fk := n.{{ $fk.StructField }}
 				{{- if $fk.Field.Nillable }}
 					if fk == nil {
-						return nil, fmt.Errorf(`foreign-key "{{ $fk.Field.Name }}" is nil for node %v`, n.ID)
+						return nil, fmt.Errorf(`外键 "{{ $fk.Field.Name }}" 节点是空的 %v`, n.ID)
 					}
 				{{- end }}
 				node, ok := nodeids[{{ if $fk.Field.Nillable }}*{{ end }}fk]
 				if !ok {
-					return nil, fmt.Errorf(`unexpected foreign-key "{{ $fk.Field.Name }}" returned %v for node %v`, {{ if $fk.Field.Nillable }}*{{ end }}fk, n.ID)
+					return nil, fmt.Errorf(`意外的外键 "{{ $fk.Field.Name }}" 返回 %v 对于节点 %v`, {{ if $fk.Field.Nillable }}*{{ end }}fk, n.ID)
 				}
 				node.Edges.{{ $e.StructField }} = {{ if $e.Unique }}n{{ else }}append(node.Edges.{{ $e.StructField }}, n){{ end }}
 			}
@@ -426,7 +426,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 	{{- $receiver := $.Scope.Receiver }}
 	for _, f := range {{ $receiver }}.fields {
 		if !{{ $.Package }}.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
+			return &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: 错误字段 %q 在查询中", f)}
 		}
 	}
 {{- end }}

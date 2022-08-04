@@ -91,7 +91,7 @@ type Conn struct {
 func (c Conn) Exec(ctx context.Context, query string, args, v interface{}) error {
 	argv, ok := args.([]interface{})
 	if !ok {
-		return fmt.Errorf("dialect/sql: invalid type %T. expect []interface{} for args", v)
+		return fmt.Errorf("执行SQL: 错误的类型 %T. 应该是参数错误", v)
 	}
 	switch v := v.(type) {
 	case nil:
@@ -105,7 +105,7 @@ func (c Conn) Exec(ctx context.Context, query string, args, v interface{}) error
 		}
 		*v = res
 	default:
-		return fmt.Errorf("dialect/sql: invalid type %T. expect *sql.Result", v)
+		return fmt.Errorf("执行SQL: 错误的类型 %T. 应该是返回错误", v)
 	}
 	return nil
 }
@@ -114,11 +114,11 @@ func (c Conn) Exec(ctx context.Context, query string, args, v interface{}) error
 func (c Conn) Query(ctx context.Context, query string, args, v interface{}) error {
 	vr, ok := v.(*Rows)
 	if !ok {
-		return fmt.Errorf("dialect/sql: invalid type %T. expect *sql.Rows", v)
+		return fmt.Errorf("执行SQL: 错误的类型 %T. 应该是行错误", v)
 	}
 	argv, ok := args.([]interface{})
 	if !ok {
-		return fmt.Errorf("dialect/sql: invalid type %T. expect []interface{} for args", args)
+		return fmt.Errorf("执行SQL: 错误的类型 %T. 应该是参数错误", args)
 	}
 	rows, err := c.QueryContext(ctx, query, argv...)
 	if err != nil {
