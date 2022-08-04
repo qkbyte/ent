@@ -881,7 +881,8 @@ func (d *MySQL) atTypeC(c1 *Column, c2 *schema.Column) error {
 	case field.TypeFloat32, field.TypeFloat64:
 		t = &schema.FloatType{T: c1.scanTypeOr(mysql.TypeDouble)}
 	case field.TypeTime:
-		t = &schema.TimeType{T: c1.scanTypeOr(mysql.TypeTimestamp)}
+		precision := 3
+		t = &schema.TimeType{T: c1.scanTypeOr(mysql.TypeTimestamp), Precision: &precision}
 		// In MariaDB or in MySQL < v8.0.2, the TIMESTAMP column has both `DEFAULT CURRENT_TIMESTAMP`
 		// and `ON UPDATE CURRENT_TIMESTAMP` if neither is specified explicitly. this behavior is
 		// suppressed if the column is defined with a `DEFAULT` clause or with the `NULL` attribute.
